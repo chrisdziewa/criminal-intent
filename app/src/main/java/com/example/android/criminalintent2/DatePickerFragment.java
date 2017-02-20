@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,16 +42,19 @@ public class DatePickerFragment extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Date date = (Date) getArguments().getSerializable(ARG_DATE);
+        Date startingDate = (Date) getArguments().getSerializable(ARG_DATE);
 
-        final Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance();
 
-        calendar.setTime(date);
+        calendar.setTime(startingDate);
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
+        // Fill in existing time so it isn't replaced by 0:00 every time
+        final int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        final int minutes = calendar.get(Calendar.MINUTE);
 
-        View v = inflater.inflate(R.layout.dialog_date, container);
+        View v = inflater.inflate(R.layout.dialog_date, null);
 
         mDatePicker = (DatePicker) v.findViewById(R.id.dialog_date_date_picker);
         mDatePicker.init(year, month, day, null);
@@ -62,10 +66,6 @@ public class DatePickerFragment extends DialogFragment {
                 int year = mDatePicker.getYear();
                 int month = mDatePicker.getMonth();
                 int day = mDatePicker.getDayOfMonth();
-
-                // Fill in existing time so it isn't replaced by 0:00 every time
-                int hour = calendar.get(Calendar.HOUR_OF_DAY);
-                int minutes = calendar.get(Calendar.MINUTE);
                 Date date = new GregorianCalendar(year, month, day, hour, minutes).getTime();
                 sendResult(Activity.RESULT_OK, date);
             }
@@ -75,7 +75,11 @@ public class DatePickerFragment extends DialogFragment {
         mNegativeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dismiss();
+                if (getTargetFragment() != null) {
+                    dismiss();
+                } else {
+                    getActivity().finish();
+                }
             }
         });
 
@@ -83,15 +87,23 @@ public class DatePickerFragment extends DialogFragment {
     }
 
     private void sendResult(int resultCode, Date date) {
-        if (getTargetFragment() == null) {
-            return;
+
+        if (getTargetFragment() != null) {
+            // send back to fragment
+            Intent intent = new Intent();
+            intent.putExtra(EXTRA_DATE, date);
+            getTargetFragment()
+                    .onActivityResult(getTargetRequestCode(), resultCode, intent);
+            Log.i("DatePickerFragment", "called from target, sending back result now");
+            dismiss();
         }
 
+        // Otherwise fragment was called from an activity
+        Log.i("DatePickerFragment", "called from activity, sending back result now");
         Intent intent = new Intent();
         intent.putExtra(EXTRA_DATE, date);
+        getActivity().setResult(resultCode, intent);
+        getActivity().finish();
 
-        getTargetFragment()
-                .onActivityResult(getTargetRequestCode(), resultCode, intent);
-        dismiss();
     }
 }

@@ -1,13 +1,16 @@
 package com.example.android.criminalintent2;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,11 +29,17 @@ import java.util.UUID;
 public class CrimeFragment extends Fragment {
 
     private static final String ARG_CRIME_ID = "crime_id";
+
+    // Dialog tags
     private static final String DIALOG_DATE = "DialogDate";
     private static final String DIALOG_TIME = "DialogTime";
 
-    private static final int REQUEST_DATE = 0;
-    private static final int REQUEST_TIME = 1;
+    // Activity extras
+    public static final String EXTRA_DATE = "date";
+
+    public static final int ACTIVITY_REQUEST_DATE = 3;
+    public static final int REQUEST_DATE = 0;
+    public static final int REQUEST_TIME = 1;
 
     private Crime mCrime;
     private EditText mTitleField;
@@ -84,10 +93,18 @@ public class CrimeFragment extends Fragment {
         mDateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FragmentManager manager = getFragmentManager();
-                DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
-                dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
-                dialog.show(manager, DIALOG_DATE);
+                if (isTablet(getContext())) {
+                    Log.i("CrimeFragment", "Device is a tablet, show dialog");
+                    FragmentManager manager = getFragmentManager();
+                    DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
+                    dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
+                    dialog.show(manager, DIALOG_DATE);
+                } else {
+                    // Screen is smaller - display dialog as full screen activity
+                    Intent intent = new Intent(getContext(), DatePickerActivity.class);
+                    intent.putExtra(EXTRA_DATE, mCrime.getDate());
+                    startActivityForResult(intent, ACTIVITY_REQUEST_DATE);
+                }
             }
         });
 
@@ -95,7 +112,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 FragmentManager manager = getFragmentManager();
-                TimePickerFragment dialog = TimePickerFragment.newInstance(currentDate);
+                TimePickerFragment dialog = TimePickerFragment.newInstance(mCrime.getDate());
                 dialog.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
                 dialog.show(manager, DIALOG_TIME);
             }
@@ -129,11 +146,13 @@ public class CrimeFragment extends Fragment {
             return;
         }
 
-        if (requestCode == REQUEST_DATE || requestCode == REQUEST_TIME) {
+        if (requestCode == REQUEST_DATE || requestCode == REQUEST_TIME || requestCode == ACTIVITY_REQUEST_DATE) {
             final Date date;
-            if (requestCode == REQUEST_DATE) {
+            if (requestCode == REQUEST_DATE || requestCode == ACTIVITY_REQUEST_DATE) {
+                Log.i("CrimeFragment", "Result received");
                 date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             } else {
+                Log.i("CrimeFragment", "Time picker was called");
                 date = (Date) data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
             }
 
@@ -141,5 +160,20 @@ public class CrimeFragment extends Fragment {
             mDateButton.setText(DateFormatter.formatDateAsString(date));
             mTimeButton.setText(DateFormatter.formatDateAsTimeString(date));
         }
+    }
+
+    // For determining dialog as dialog or fragment
+    // from http://www.androidcodesnippets.com/2016/02/check-if-device-is-tablet-or-phone/
+    private boolean isTablet(Context context) {
+        return (context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        outState.putSerializable(ARG_CRIME_ID, mCrime.getId());
+
+        super.onSaveInstanceState(outState);
+
     }
 }
