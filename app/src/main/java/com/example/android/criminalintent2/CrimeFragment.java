@@ -36,10 +36,13 @@ public class CrimeFragment extends Fragment {
 
     // Activity extras
     public static final String EXTRA_DATE = "date";
+    public static final String EXTRA_TIME = "time";
 
     public static final int ACTIVITY_REQUEST_DATE = 3;
+    public static final int ACTIVITY_REQUEST_TIME = 4;
     public static final int REQUEST_DATE = 0;
     public static final int REQUEST_TIME = 1;
+
 
     private Crime mCrime;
     private EditText mTitleField;
@@ -111,10 +114,18 @@ public class CrimeFragment extends Fragment {
         mTimeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FragmentManager manager = getFragmentManager();
-                TimePickerFragment dialog = TimePickerFragment.newInstance(mCrime.getDate());
-                dialog.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
-                dialog.show(manager, DIALOG_TIME);
+                if (isTablet(getContext())) {
+                    Log.i("CrimeFragment", "Device is a tablet, show dialog");
+                    FragmentManager manager = getFragmentManager();
+                    TimePickerFragment dialog = TimePickerFragment.newInstance(mCrime.getDate());
+                    dialog.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
+                    dialog.show(manager, DIALOG_TIME);
+                } else {
+                    // Screen is smaller - display dialog as full screen activity
+                    Intent intent = new Intent(getContext(), TimePickerActivity.class);
+                    intent.putExtra(EXTRA_TIME, mCrime.getDate());
+                    startActivityForResult(intent, ACTIVITY_REQUEST_TIME);
+                }
             }
         });
 
@@ -146,13 +157,12 @@ public class CrimeFragment extends Fragment {
             return;
         }
 
-        if (requestCode == REQUEST_DATE || requestCode == REQUEST_TIME || requestCode == ACTIVITY_REQUEST_DATE) {
+        if (requestCode == REQUEST_DATE || requestCode == REQUEST_TIME ||
+                requestCode == ACTIVITY_REQUEST_DATE || requestCode == ACTIVITY_REQUEST_TIME) {
             final Date date;
             if (requestCode == REQUEST_DATE || requestCode == ACTIVITY_REQUEST_DATE) {
-                Log.i("CrimeFragment", "Result received");
                 date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             } else {
-                Log.i("CrimeFragment", "Time picker was called");
                 date = (Date) data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
             }
 

@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,12 +93,11 @@ public class DatePickerFragment extends DialogFragment {
             intent.putExtra(EXTRA_DATE, date);
             getTargetFragment()
                     .onActivityResult(getTargetRequestCode(), resultCode, intent);
-            Log.i("DatePickerFragment", "called from target, sending back result now");
             dismiss();
+            return;
         }
 
         // Otherwise fragment was called from an activity
-        Log.i("DatePickerFragment", "called from activity, sending back result now");
         Intent intent = new Intent();
         intent.putExtra(EXTRA_DATE, date);
         getActivity().setResult(resultCode, intent);

@@ -1,16 +1,16 @@
 package com.example.android.criminalintent2;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TimePicker;
 
 import java.util.Calendar;
@@ -29,9 +29,12 @@ public class TimePickerFragment extends DialogFragment {
             "com.bignerdranch.android.criminalintent.time";
 
     private TimePicker mTimePicker;
+    private Button mPositiveButton;
+    private Button mNegativeButton;
 
+    @Nullable
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         Date date = (Date) getArguments().getSerializable(ARG_DATE);
 
@@ -56,34 +59,48 @@ public class TimePickerFragment extends DialogFragment {
             mTimePicker.setCurrentMinute(minutes);
         }
 
-        return new AlertDialog.Builder(getActivity())
-                .setView(v)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        int year = calendar.get(Calendar.YEAR);
-                        int month = calendar.get(Calendar.MONTH);
-                        int day = calendar.get(Calendar.DAY_OF_MONTH);
-                        int hour;
-                        int minutes;
+        mPositiveButton = (Button) v.findViewById(R.id.save_button);
+        mNegativeButton = (Button) v.findViewById(R.id.cancel_button);
 
-                        if (Build.VERSION.SDK_INT >= 23) {
-                            hour = mTimePicker.getHour();
-                            minutes = mTimePicker.getMinute();
-                        } else {
-                            hour = mTimePicker.getCurrentHour();
-                            minutes = mTimePicker.getCurrentMinute();
-                        }
+        mPositiveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH);
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
+                int hour;
+                int minutes;
 
-                        Log.i("TimePickerFragment", "The values are as follows: year-" + year + " month-" + month + " day-" + day + " hour-" + hour + " minutes-" + minutes);
+                if (Build.VERSION.SDK_INT >= 23) {
+                    hour = mTimePicker.getHour();
+                    minutes = mTimePicker.getMinute();
+                } else {
+                    hour = mTimePicker.getCurrentHour();
+                    minutes = mTimePicker.getCurrentMinute();
+                }
 
-                        Date newDate = new GregorianCalendar(year, month, day, hour, minutes).getTime();
+                Log.i("TimePickerFragment", "The values are as follows: year-" + year + " month-" + month + " day-" + day + " hour-" + hour + " minutes-" + minutes);
 
-                        sendResult(Activity.RESULT_OK, newDate);
-                    }
-                })
-                .create();
+                Date newDate = new GregorianCalendar(year, month, day, hour, minutes).getTime();
+
+                sendResult(Activity.RESULT_OK, newDate);
+            }
+        });
+
+        mNegativeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (getTargetFragment() != null) {
+                    dismiss();
+                } else {
+                    getActivity().finish();
+                }
+            }
+        });
+
+        return v;
     }
+
 
 
     // For attaching arguments to the dialog fragment
@@ -97,18 +114,24 @@ public class TimePickerFragment extends DialogFragment {
     }
 
     /**
-     *
      * @param resultCode telling the receiver whether or not the function was successful
-     * @param newDate The new date to be updated
+     * @param newDate    The new date to be updated
      */
     private void sendResult(int resultCode, Date newDate) {
-        if (getTargetFragment() == null) {
+        if (getTargetFragment() != null) {
+
+            Intent intent = new Intent();
+            intent.putExtra(EXTRA_TIME, newDate);
+            getTargetFragment()
+                    .onActivityResult(getTargetRequestCode(), resultCode, intent);
+            dismiss();
             return;
         }
 
+        // Otherwise fragment was called from an activity
         Intent intent = new Intent();
         intent.putExtra(EXTRA_TIME, newDate);
-
-        getTargetFragment().onActivityResult(getTargetRequestCode(), resultCode, intent);
+        getActivity().setResult(resultCode, intent);
+        getActivity().finish();
     }
 }

@@ -18,6 +18,7 @@
         <activity android:name=".CrimePagerActivity">
         </activity>
         <activity android:name=".DatePickerActivity"></activity>
+        <activity android:name=".TimePickerActivity"></activity>
     </application>
 
 </manifest>
