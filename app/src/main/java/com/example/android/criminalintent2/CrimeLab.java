@@ -28,6 +28,11 @@ public class CrimeLab {
         return sCrimeLab;
     }
 
+    // Adds a crime to the list of crimes
+    public void addCrime(Crime c) {
+        mCrimes.add(c);
+    }
+
     public List<Crime> getCrimes() {
         return mCrimes;
     }
@@ -48,13 +53,5 @@ public class CrimeLab {
      */
     private CrimeLab(Context context) {
         mCrimes = new ArrayList<>();
-
-        // Temporarily populat the Crime Lab with 100 crimes
-        for (int i = 0; i < 100; i++) {
-            Crime crime = new Crime();
-            crime.setTitle("Crime #" + i);
-            crime.setSolved(i % 2 == 0); // Every other one
-            mCrimes.add(crime);
-        }
     }
 }
