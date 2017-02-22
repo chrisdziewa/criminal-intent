@@ -18,8 +18,8 @@
         <activity android:name=".CrimePagerActivity"
             android:parentActivityName=".CrimeListActivity">
         </activity>
-        <activity android:name=".DatePickerActivity"></activity>
-        <activity android:name=".TimePickerActivity"></activity>
+        <activity android:name=".DatePickerActivity"/>
+        <activity android:name=".TimePickerActivity"/>
     </application>
 
 </manifest>

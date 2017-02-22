@@ -12,12 +12,16 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.Date;
 import java.util.UUID;
@@ -61,6 +65,8 @@ public class CrimeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_crime, container, false);
+
+        setHasOptionsMenu(true);
         mTitleField = (EditText) v.findViewById(R.id.crime_title);
         mTitleField.setText(mCrime.getTitle());
         mTitleField.addTextChangedListener(new TextWatcher() {
@@ -184,6 +190,32 @@ public class CrimeFragment extends Fragment {
         outState.putSerializable(ARG_CRIME_ID, mCrime.getId());
 
         super.onSaveInstanceState(outState);
-
     }
+
+    private void deleteCrime() {
+        CrimeLab crimeLab = CrimeLab.get(getActivity());
+        crimeLab.deleteCrime(mCrime);
+
+        Toast.makeText(getActivity(), R.string.toast_delete_crime, Toast.LENGTH_SHORT)
+                .show();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_crime, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_delete_crime:
+                deleteCrime();
+                getActivity().finish();
+                return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
 }

@@ -27,7 +27,6 @@ public class CrimeListFragment extends Fragment {
 
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
-    private int mCurrentPosition;
 
     // Subtitle on toolbar
     private static final String SAVED_SUBTITLE_VISIBLE = "subtitle";
@@ -51,8 +50,6 @@ public class CrimeListFragment extends Fragment {
             mSubtitleVisible = savedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
         }
 
-        updateUI();
-
         return view;
     }
 
@@ -65,7 +62,7 @@ public class CrimeListFragment extends Fragment {
             mCrimeRecyclerView.setAdapter(mAdapter);
         } else {
             // Otherwise update existing adapter data
-            mAdapter.notifyItemChanged(mCurrentPosition);
+            mAdapter.notifyDataSetChanged();
         }
 
         updateSubtitle();
@@ -108,7 +105,6 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View view) {
-            mCurrentPosition = getAdapterPosition();
             Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
             startActivity(intent);
         }
