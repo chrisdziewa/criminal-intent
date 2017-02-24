@@ -76,6 +76,7 @@ public class CrimeListFragment extends Fragment {
             mCrimeRecyclerView.setAdapter(mAdapter);
         } else {
             // Otherwise update existing adapter data
+            mAdapter.setCrimes(crimes);
             mAdapter.notifyDataSetChanged();
         }
         if (mAdapter.getItemCount() == 0) {
@@ -155,6 +156,10 @@ public class CrimeListFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mCrimes.size();
+        }
+
+        public void setCrimes(List<Crime> crimes) {
+            mCrimes = crimes;
         }
     }
 
