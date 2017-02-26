@@ -42,6 +42,7 @@
     <!-- Empty List view -->
     <string name="empty_view_text_view">There are no crimes...yet</string>
     <string name="empty_view_add_button">create new crime</string>
+    <string name="crime_report_call">Call Suspect</string>
 
 
 </resources>

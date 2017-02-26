@@ -1,5 +1,6 @@
 package com.example.android.criminalintent2;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -10,9 +11,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ShareCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -36,6 +39,7 @@ import java.util.UUID;
  */
 
 public class CrimeFragment extends Fragment {
+    private static final String CRIME_FRAGMENT = "CrimeFragment";
 
     private static final String ARG_CRIME_ID = "crime_id";
 
@@ -56,6 +60,7 @@ public class CrimeFragment extends Fragment {
     public static final int ACTIVITY_REQUEST_TIME = 4;
     public static final int REQUEST_CONTACT = 5;
 
+    public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 6;
 
     private Crime mCrime;
     private EditText mTitleField;
@@ -64,6 +69,7 @@ public class CrimeFragment extends Fragment {
     private CheckBox mSolvedCheckBox;
     private Button mReportButton;
     private Button mSuspectButton;
+    private Button mCallSuspectButton;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -114,7 +120,6 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (isTablet(getContext())) {
-                    Log.i("CrimeFragment", "Device is a tablet, show dialog");
                     FragmentManager manager = getFragmentManager();
                     DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
                     dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
@@ -132,7 +137,6 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (isTablet(getContext())) {
-                    Log.i("CrimeFragment", "Device is a tablet, show dialog");
                     FragmentManager manager = getFragmentManager();
                     TimePickerFragment dialog = TimePickerFragment.newInstance(mCrime.getDate());
                     dialog.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
@@ -185,6 +189,14 @@ public class CrimeFragment extends Fragment {
             mSuspectButton.setText(mCrime.getSuspect());
         }
 
+        mCallSuspectButton = (Button) v.findViewById(R.id.crime_call_suspect);
+        mCallSuspectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                checkReadContactsPermission();
+            }
+        });
+
         // Disable the choose suspect button to prevent crash
         // when no contacts app is available
         PackageManager packageManager = getActivity().getPackageManager();
@@ -228,7 +240,8 @@ public class CrimeFragment extends Fragment {
             // Specify which fields you want your query to return
             // values for.
             String[] queryFields = new String[]{
-                    ContactsContract.Contacts.DISPLAY_NAME
+                    ContactsContract.Contacts.DISPLAY_NAME,
+                    ContactsContract.Contacts._ID
             };
             // Perform your query - the contactUri is like a "where"
             // clause here
@@ -237,15 +250,21 @@ public class CrimeFragment extends Fragment {
 
             try {
                 // Double-check that results were actually received
-                if (c.getCount() == 0) {
+                if (c != null && c.getCount() == 0) {
                     return;
                 }
 
                 // Pull out the first column of the first row of data -
                 // that is your suspect's name.
                 c.moveToFirst();
-                String suspect = c.getString(0);
+                int suspectIndex = c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+                int suspectIdIndex = c.getColumnIndex(ContactsContract.Contacts._ID);
+
+                String suspect = c.getString(suspectIndex);
+                int suspectId = c.getInt(suspectIdIndex);
+
                 mCrime.setSuspect(suspect);
+                mCrime.setSuspectId(suspectId);
                 mSuspectButton.setText(suspect);
             } finally {
                 c.close();
@@ -325,4 +344,92 @@ public class CrimeFragment extends Fragment {
 
         CrimeLab.get(getActivity()).updateCrime(mCrime);
     }
+
+    public void checkReadContactsPermission() {// Here, thisActivity is the current activity
+        Log.i(CRIME_FRAGMENT, "checkReadContactsPermission: start");
+        if (ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                    Manifest.permission.READ_CONTACTS)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{Manifest.permission.READ_CONTACTS},
+                        MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            Log.i(CRIME_FRAGMENT, "checkReadContactsPermission: called");
+            callSuspect();
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+                // If request is cancelled, the result arrays are empty.
+                Toast.makeText(getActivity(), "Dial with phone successful", Toast.LENGTH_SHORT).show();
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    callSuspect();
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                break;
+            }
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
+    private void callSuspect() {
+       Cursor c = getActivity().getContentResolver().query(
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER},
+                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=?",
+                new String[]{String.valueOf(mCrime.getSuspectId())},
+                null
+        );
+        // Dial suspect if one exists
+
+        try {
+            if (c == null || c.getCount() == 0) {
+                Log.i(CRIME_FRAGMENT, "callSuspect cursor null or zero");
+                return;
+            }
+            c.moveToFirst();
+
+            String phoneNumber = c.getString(0);
+
+            Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumber));
+            startActivity(intent);
+
+        } finally {
+            c.close();
+        }
+    }
+
+
 }

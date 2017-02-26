@@ -66,17 +66,24 @@
 
         <Button
             android:id="@+id/crime_suspect"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/crime_suspect_text"/>
 
         <Button
             android:id="@+id/crime_report"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/crime_report_text"/>
+
+        <Button
+            android:id="@+id/crime_call_suspect"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/crime_report_call"/>
     </LinearLayout>
 
 </LinearLayout>
