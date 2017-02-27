@@ -193,6 +193,11 @@ public class CrimeFragment extends Fragment {
         mCallSuspectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                if (mCrime.getSuspect() == null) {
+                    Toast.makeText(getActivity(), getString(R.string.toast_no_suspect), Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 checkReadContactsPermission();
             }
         });

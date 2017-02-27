@@ -43,6 +43,7 @@
     <string name="empty_view_text_view">There are no crimes...yet</string>
     <string name="empty_view_add_button">create new crime</string>
     <string name="crime_report_call">Call Suspect</string>
+    <string name="toast_no_suspect">Please choose a suspect</string>
 
 
 </resources>
