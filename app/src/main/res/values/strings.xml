@@ -9,6 +9,7 @@
     <!-- Dialogs -->
     <string name="dialog_time_title">Select time of crime</string>
     <string name="dialog_date_title">Select crime date</string>
+    <string name="dialog_image_title">Image of Crime</string>
     <string name="save_button">Save</string>
     <string name="cancel_button">Cancel</string>
     <string name="crime_suspect_text">Choose Suspect</string>
@@ -44,6 +45,8 @@
     <string name="empty_view_add_button">create new crime</string>
     <string name="crime_report_call">Call Suspect</string>
     <string name="toast_no_suspect">Please choose a suspect</string>
+
+
 
 
 </resources>

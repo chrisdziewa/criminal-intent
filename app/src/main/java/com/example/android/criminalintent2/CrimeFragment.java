@@ -53,6 +53,7 @@ public class CrimeFragment extends Fragment {
     // Dialog tags
     private static final String DIALOG_DATE = "DialogDate";
     private static final String DIALOG_TIME = "DialogTime";
+    private static final String DIALOG_IMAGE = "DialogImage";
 
     // Activity extras
     public static final String EXTRA_DATE = "date";
@@ -254,6 +255,16 @@ public class CrimeFragment extends Fragment {
         });
 
         mPhotoView = (ImageView) v.findViewById(R.id.crime_photo);
+
+        // On image click, open zoomed image dialog
+        mPhotoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentManager fragmentManager = getFragmentManager();
+                ImageDisplayFragment fragment = ImageDisplayFragment.newInstance(mPhotoFile);
+                fragment.show(fragmentManager, DIALOG_IMAGE);
+            }
+        });
 
         updatePhotoView();
 
