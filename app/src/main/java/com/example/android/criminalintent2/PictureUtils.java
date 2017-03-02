@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.util.Log;
 
 /**
  * Created by Chris on 3/1/2017.
@@ -30,6 +31,7 @@ public class PictureUtils {
         }
 
         options = new BitmapFactory.Options();
+        Log.i("PictureUtils", "getScaledBitmap: inSampleSize=" + inSampleSize);
         options.inSampleSize = inSampleSize;
 
         // Read in and create final bitmap
