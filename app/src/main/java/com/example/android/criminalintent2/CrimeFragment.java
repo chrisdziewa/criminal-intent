@@ -85,7 +85,28 @@ public class CrimeFragment extends Fragment {
     private ImageView mPhotoView;
     private ViewTreeObserver mPhotoTreeObserver;
 
+    private Callbacks mCallbacks;
+
+    public interface Callbacks {
+        void onCrimeUpdated(Crime crime);
+    }
+
     private Point mPhotoViewSize;
+
+    public static CrimeFragment newInstance(UUID crimeId) {
+        Bundle args = new Bundle();
+        args.putSerializable(ARG_CRIME_ID, crimeId);
+
+        CrimeFragment fragment = new CrimeFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallbacks = (Callbacks) context;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -93,6 +114,19 @@ public class CrimeFragment extends Fragment {
         UUID crimeId = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
         mPhotoFile = CrimeLab.get(getActivity()).getPhotoFile(mCrime);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        CrimeLab.get(getActivity()).updateCrime(mCrime);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
     }
 
     @Nullable
@@ -112,6 +146,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 mCrime.setTitle(charSequence.toString());
+                updateCrime();
             }
 
             @Override
@@ -174,6 +209,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mCrime.setSolved(isChecked);
+                updateCrime();
             }
         });
 
@@ -286,15 +322,6 @@ public class CrimeFragment extends Fragment {
         return v;
     }
 
-    public static CrimeFragment newInstance(UUID crimeId) {
-        Bundle args = new Bundle();
-        args.putSerializable(ARG_CRIME_ID, crimeId);
-
-        CrimeFragment fragment = new CrimeFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK) {
@@ -313,6 +340,7 @@ public class CrimeFragment extends Fragment {
             mCrime.setDate(date);
             mDateButton.setText(DateFormatter.formatDateAsString(date));
             mTimeButton.setText(DateFormatter.formatDateAsTimeString(date));
+            updateCrime();
         } else if (requestCode == REQUEST_CONTACT && data != null) {
             Uri contactUri = data.getData();
             // Specify which fields you want your query to return
@@ -344,6 +372,7 @@ public class CrimeFragment extends Fragment {
                 mCrime.setSuspect(suspect);
                 mCrime.setSuspectId(suspectId);
                 mSuspectButton.setText(suspect);
+                updateCrime();
             } finally {
                 c.close();
             }
@@ -352,6 +381,7 @@ public class CrimeFragment extends Fragment {
                     "com.example.android.criminalintent2.fileprovider", mPhotoFile);
             // Remove temporary write access to file from camera
             getActivity().revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            updateCrime();
             updatePhotoView();
         }
     }
@@ -387,6 +417,7 @@ public class CrimeFragment extends Fragment {
             mPhotoView.setImageDrawable(null);
             mPhotoView.setClickable(false);
         } else {
+            mPhotoView.setClickable(true);
             Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), mPhotoViewSize.x, mPhotoViewSize.y);
             mPhotoView.setImageBitmap(bitmap);
         }
@@ -409,6 +440,7 @@ public class CrimeFragment extends Fragment {
     private void deleteCrime() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         crimeLab.deleteCrime(mCrime);
+        mCallbacks.onCrimeUpdated(mCrime);
 
         Toast.makeText(getActivity(), R.string.toast_delete_crime, Toast.LENGTH_SHORT)
                 .show();
@@ -424,19 +456,21 @@ public class CrimeFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_delete_crime:
-                deleteCrime();
-                getActivity().finish();
+                if (getActivity().findViewById(R.id.detail_fragment_container) == null) {
+                    deleteCrime();
+                    getActivity().finish();
+                } else {
+                    // Using tablet with two pane view (Clear out fragment
+                    deleteCrime();
+                    getActivity().getSupportFragmentManager()
+                            .beginTransaction()
+                            .remove(this)
+                            .commit();
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        CrimeLab.get(getActivity()).updateCrime(mCrime);
     }
 
     public void checkReadContactsPermission() {// Here, thisActivity is the current activity
@@ -523,6 +557,11 @@ public class CrimeFragment extends Fragment {
         } finally {
             c.close();
         }
+    }
+
+    private void updateCrime() {
+        CrimeLab.get(getActivity()).updateCrime(mCrime);
+        mCallbacks.onCrimeUpdated(mCrime);
     }
 
 
