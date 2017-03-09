@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">IntentoCriminal</string>
+    <string name="crime_title_hint">Introduzca un titulo para el crimen.</string>
+    <string name="crime_title_label">Titulo</string>
+    <string name="crime_details_label">Detalles</string>
+    <string name="crime_solved_label">Solucionado</string>
+    <string name="new_crime">Crimen Nuevo</string>
+    <string name="show_subtitle">Mostrar Subtitulos</string>
+    <string name="hide_subtitle">Esconder Subtitulos</string>
+    <string name="subtitle_format">%1$s crimenes</string>
+    <string name="crime_suspect_text">Elegir Sospechoso</string>
+    <string name="crime_report_text">Enviar el Informe del Crimen</string>
+    <string name="crime_report">%1$s! El crimen fue descubierto el %2$s. %3$s, y %4$s</string>
+    
+    <string name="crime_report_solved">El caso está resuelto</string>
+    <string name="crime_report_unsolved">El caso no está resuelto</string>
+    <string name="crime_report_no_suspect">no hay sospechoso.</string>
+    <string name="crime_report_suspect">el/la sospechoso/a es %s.</string>
+    <string name="crime_report_subject">IntentoCriminal Informe del Crimen</string>
+    <string name="send_report">Enviar el informe del crimen a través de</string>
+    <string name="crime_report_call">LLamar al sospecho</string>
+    <string name="cancel_button">Cancelar</string>
+    <string name="delete_crime">Borar Crimen</string>
+    <string name="dialog_date_title">Elegir Fecha del Crimen</string>
+    <string name="dialog_image_title">Imagen del Crimen</string>
+    <string name="dialog_time_title">Elegir Tiempo Del Crimen</string>
+    <string name="empty_view_add_button">Creer Nuevo Crimen</string>
+    <string name="empty_view_text_view">Aún no hay crimenes</string>
+    <string name="save_button">Salvar</string>
+    <string name="toast_delete_crime">El crimen ha sido eliminado</string>
+    <string name="toast_no_suspect">Por favor elega un sospechoso</string>
+</resources>

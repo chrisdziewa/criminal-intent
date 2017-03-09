@@ -442,6 +442,14 @@ public class CrimeFragment extends Fragment {
         crimeLab.deleteCrime(mCrime);
         mCallbacks.onCrimeUpdated(mCrime);
 
+        // Delete the image file associated with crime if exists
+
+        File file = new File(mPhotoFile.getPath());
+        if (file.exists()) {
+            file.delete();
+            Log.i("CrimeFragment", "deleteCrime photo called");
+        }
+
         Toast.makeText(getActivity(), R.string.toast_delete_crime, Toast.LENGTH_SHORT)
                 .show();
     }
