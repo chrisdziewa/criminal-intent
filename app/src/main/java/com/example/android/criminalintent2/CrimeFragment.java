@@ -40,6 +40,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -70,6 +71,10 @@ public class CrimeFragment extends Fragment {
     public static final int REQUEST_CONTACT = 5;
 
     public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 6;
+
+    // Formatting date/time
+    private static final int DATE_FORMAT = DateFormat.FULL;
+    private static final int TIME_FORMAT = DateFormat.SHORT;
 
     // Widgets
     private Crime mCrime;
@@ -159,12 +164,12 @@ public class CrimeFragment extends Fragment {
         mDateButton = (Button) v.findViewById(R.id.crime_date);
         final Date currentDate = mCrime.getDate();
 
-        String formattedDate = DateFormatter.formatDateAsString(currentDate);
+        String formattedDate = DateFormatter.formatDateAsString(DATE_FORMAT, currentDate);
         mDateButton.setText(formattedDate);
 
         // Setup time button
         mTimeButton = (Button) v.findViewById(R.id.crime_time_button);
-        String formattedTime = DateFormatter.formatDateAsTimeString(currentDate);
+        String formattedTime = DateFormatter.formatDateAsTimeString(TIME_FORMAT, currentDate);
         mTimeButton.setText(formattedTime);
 
         // Button on click listeners
@@ -338,8 +343,8 @@ public class CrimeFragment extends Fragment {
             }
 
             mCrime.setDate(date);
-            mDateButton.setText(DateFormatter.formatDateAsString(date));
-            mTimeButton.setText(DateFormatter.formatDateAsTimeString(date));
+            mDateButton.setText(DateFormatter.formatDateAsString(DATE_FORMAT, date));
+            mTimeButton.setText(DateFormatter.formatDateAsTimeString(TIME_FORMAT, date));
             updateCrime();
         } else if (requestCode == REQUEST_CONTACT && data != null) {
             Uri contactUri = data.getData();
@@ -396,9 +401,9 @@ public class CrimeFragment extends Fragment {
         }
 
         Date date = mCrime.getDate();
-        String dateString = DateFormatter.formatDateAsString(date);
+        String dateString = DateFormatter.formatDateAsString(DATE_FORMAT, date);
 
-        String timeString = DateFormatter.formatDateAsTimeString(date);
+        String timeString = DateFormatter.formatDateAsTimeString(TIME_FORMAT, date);
 
         String suspect = mCrime.getSuspect();
         if (suspect == null) {

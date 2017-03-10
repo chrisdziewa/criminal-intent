@@ -21,6 +21,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -157,7 +159,10 @@ public class CrimeListFragment extends Fragment {
         public void bindCrime(Crime crime) {
             mCrime = crime;
             mTitleTextView.setText(mCrime.getTitle());
-            mDateTextView.setText(mCrime.getDate().toString());
+            Date date = mCrime.getDate();
+            String formattedDate = DateFormatter.formatDateAsString(DateFormat.LONG, date);
+            String formattedTime = DateFormatter.formatDateAsTimeString(DateFormat.SHORT, date);
+            mDateTextView.setText(formattedDate + " @ " + formattedTime);
             mSolvedCheckBox.setChecked(mCrime.isSolved());
         }
 
