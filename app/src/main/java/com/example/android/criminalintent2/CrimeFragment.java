@@ -386,6 +386,15 @@ public class CrimeFragment extends Fragment {
                     "com.example.android.criminalintent2.fileprovider", mPhotoFile);
             // Remove temporary write access to file from camera
             getActivity().revokeUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+            mPhotoView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    // Announce to screenreader
+                    mPhotoView.announceForAccessibility(getString(R.string.photo_announcement));
+                }
+            }, 500);
+
             updateCrime();
             updatePhotoView();
         }
@@ -421,10 +430,12 @@ public class CrimeFragment extends Fragment {
         if (mPhotoFile == null || !mPhotoFile.exists()) {
             mPhotoView.setImageDrawable(null);
             mPhotoView.setClickable(false);
+            mPhotoView.setContentDescription(getString(R.string.crime_photo_no_image_description));
         } else {
             mPhotoView.setClickable(true);
             Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), mPhotoViewSize.x, mPhotoViewSize.y);
             mPhotoView.setImageBitmap(bitmap);
+            mPhotoView.setContentDescription(getString(R.string.crime_photo_image_description));
         }
     }
 

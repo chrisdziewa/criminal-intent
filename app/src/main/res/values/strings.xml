@@ -6,6 +6,17 @@
     <string name="crime_solved_label">Solved</string>
     <string name="at_sign">\@</string>
 
+    <!-- Accessibility -->
+    <string name="crime_photo_button_description">Take photo of crime scene</string>
+    <string name="crime_photo_no_image_description">
+        Crime scene photo (not set)
+    </string>
+    <string name="crime_photo_image_description">
+        Crime scene photo (set)
+    </string>
+    <string name="photo_announcement">A new crime photo has been set.</string>
+
+
     <!-- Dialogs -->
     <string name="dialog_time_title">Select time of crime</string>
     <string name="dialog_date_title">Select crime date</string>
